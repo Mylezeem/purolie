@@ -1,0 +1,149 @@
+grammar PuppetClass
+
+  rule main_class
+    comment_block newline_or_space outer_class_declaration newline_or_space comment_block
+  end
+
+  rule statement
+    (newline / include_declaration / inner_class_declaration)* <Body>
+  end
+
+  #
+  # Comment Section
+  #
+  rule comment_block
+    comment
+  end
+
+  rule comment
+    ('#' newline_or_space? word* newline_or_space?)*
+  end
+
+  #
+  # Outer Class
+  #
+  rule outer_class_declaration
+    space 'class' space class_name space
+    '('? newline_or_space? outer_class_parameters ')'? newline_or_space inherit_declaration? '{' newline_or_space statement newline_or_space '}'
+  end
+
+  rule class_name
+    word+ <ClassName>
+  end
+
+  rule outer_class_parameters
+    (space outer_class_parameter coma? newline_or_space space)* <OuterClassParameters>
+  end
+
+  rule outer_class_parameter
+    parameter equal value <OuterClassParameter>
+  end
+
+  rule inherit_declaration
+    newline_or_space? 'inherits' newline_or_space inherit_class newline_or_space
+  end
+
+  rule inherit_class
+    word+
+  end
+
+
+  #
+  # Inner Class
+  #
+  rule inner_class_declaration
+    space 'class' space '{' newline_or_space quote inner_class quote space colon
+     newline_or_space inner_class_parameters
+     '}' newline_or_eof <InnerClassDeclaration>
+  end
+
+  rule inner_class_parameters
+    (space inner_class_parameter coma? newline_or_space space)* <InnerClassParameters>
+  end
+
+  rule inner_class_parameter
+    key arrow value <InnerClassParameter>
+  end
+
+  #
+  # Include
+  #
+  rule include_declaration
+    space 'include' space include_class newline_or_eof <IncludeDeclaration>
+  end
+
+  rule include_class
+    word+ <IncludeClass>
+  end
+
+
+  #####
+
+  rule inner_class
+    word+ <InnerClass>
+  end
+
+  rule parameter
+    '$' key
+  end
+
+  rule key
+    word+
+  end
+
+  rule value
+    word+
+  end
+
+
+  rule word
+    space string <Unknown2>
+  end
+
+  rule string
+   [a-z:]+ <Unknown1>
+  end
+
+  rule quote
+    ['"]
+  end
+
+  rule coma
+    space "," space
+  end
+  
+  rule arrow
+    space "=>" space
+  end
+
+  rule equal
+    space "=" space
+  end
+
+  rule colon
+    ':'
+  end
+
+  rule newline_or_space
+    newline / space
+  end
+
+  rule newline_or_eof
+    newline / eof
+  end
+
+  rule newline
+    space "\n"
+  end
+
+  rule eof
+    space !.
+  end
+
+  rule space
+    " "*
+  end
+
+
+end
+

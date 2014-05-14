@@ -6,6 +6,29 @@ module PuppetClass
     end
   end
 
+  class MainClass < Treetop::Runtime::SyntaxNode
+    def to_object
+     klass = nil
+
+     self.elements.each do |main_node|
+        case main_node
+        when PuppetClass::CommentBlock
+          true
+        when PuppetClass::OuterClassDeclaration
+          klass = main_node.to_object
+        end
+      end
+
+      return klass
+    end
+  end
+
+  class Statement < Treetop::Runtime::SyntaxNode
+    def to_hash
+      return self.text_value
+    end
+  end
+
   class Unknown3 < Treetop::Runtime::SyntaxNode
     def to_hash
       return self.text_value
@@ -23,6 +46,28 @@ module PuppetClass
   end
   class String < Treetop::Runtime::SyntaxNode
     def to_hash
+      return self.text_value
+    end
+  end
+
+
+  #
+  # Comment Section
+  #
+  class CommentBlock < Treetop::Runtime::SyntaxNode
+    def to_array
+      return 'test'
+    end
+  end
+
+  class CommentStatement < Treetop::Runtime::SyntaxNode
+    def to_array
+      return 'test'
+    end
+  end
+
+  class Comment < Treetop::Runtime::SyntaxNode
+    def to_string
       return self.text_value
     end
   end
@@ -77,15 +122,109 @@ module PuppetClass
   #
   # Outer Class
   #
-  class OuterClassParameter < Treetop::Runtime::SyntaxNode
-    def name
-      return 'test'
+  #
+  class OuterClassDeclaration < Treetop::Runtime::SyntaxNode
+    def to_object
+      class_name    = nil
+      class_params  = nil
+      inherit_class = nil
+
+      self.elements.each do |outer_class_declaration_elem|
+        case outer_class_declaration_elem
+        when PuppetClass::ClassName
+          class_name = outer_class_declaration_elem.name
+        when PuppetClass::OuterClassParametersBlock
+          class_params = outer_class_declaration_elem.to_array
+        when PuppetClass::InheritDeclaration
+          inherit_class = outer_class_declaration_elem.name
+        end
+      end
+
+      return {class_name => class_params}.merge!({'inherit' => inherit_class})
     end
   end
 
-  class OuterClassParameters < Treetop::Runtime::SyntaxNode
+  class OuterClassParametersBlock < Treetop::Runtime::SyntaxNode
+    def to_array
+      param_array = Array.new
+
+      self.elements.each do |parameter_assignation_elem|
+        case parameter_assignation_elem
+        when PuppetClass::OuterClassParameterAssignation
+          param_array.push parameter_assignation_elem.to_hash
+        end
+      end
+
+      return param_array
+    end
+  end
+
+  class OuterClassParameterAssignation < Treetop::Runtime::SyntaxNode
+    def to_hash
+      param_hash = nil
+
+      self.elements.each do |parameter_elem|
+        case parameter_elem
+        when PuppetClass::OuterClassParameter
+          param_hash = parameter_elem.to_hash
+        end
+      end
+
+      return param_hash
+    end
+  end
+
+  class OuterClassParameter < Treetop::Runtime::SyntaxNode
+    def to_hash
+      param_name  = nil
+      param_value = nil
+
+      self.elements.each do |parameter_elem|
+        case parameter_elem
+        when PuppetClass::OuterClassParameterName
+          param_name = parameter_elem.name
+        when PuppetClass::OuterClassParameterValue
+          param_value = parameter_elem.name
+        end
+      end
+
+      return {param_name => param_value}
+    end
+  end
+
+  class OuterClassParameterName < Treetop::Runtime::SyntaxNode
     def name
-      return 'test'
+      return self.text_value[1..-1]
+    end
+  end
+
+  class OuterClassParameterValue < Treetop::Runtime::SyntaxNode
+    def name
+      return self.text_value
+    end
+  end
+
+  #
+  # Inherits
+  #
+  class InheritDeclaration < Treetop::Runtime::SyntaxNode
+    def name
+      inherit_class = nil
+
+      self.elements.each do |inherit_elem|
+        case inherit_elem
+        when PuppetClass::InheritClass
+          inherit_class = inherit_elem.name
+        end
+      end
+
+      return inherit_class
+    end
+  end
+
+  class InheritClass < Treetop::Runtime::SyntaxNode
+    def name
+      return self.text_value
     end
   end
 
@@ -96,7 +235,7 @@ module PuppetClass
   #
   class ClassName < Treetop::Runtime::SyntaxNode
     def name
-      return 'test'
+      return self.text_value
     end
   end
 

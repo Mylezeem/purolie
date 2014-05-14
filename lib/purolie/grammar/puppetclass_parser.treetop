@@ -1,22 +1,26 @@
 grammar PuppetClass
 
   rule main_class
-    comment_block newline_or_space outer_class_declaration newline_or_space comment_block
+    comment_block newline_or_space  outer_class_declaration newline_or_space comment_block <MainClass>
   end
 
   rule statement
-    (newline / include_declaration / inner_class_declaration)* <Body>
+    newline_or_space (include_declaration / inner_class_declaration)* newline_or_space <Statement>
   end
 
   #
   # Comment Section
   #
   rule comment_block
-    comment
+    comment_statement* <CommentBlock>
+  end
+
+  rule comment_statement
+    comment newline_or_space <CommentStatement>
   end
 
   rule comment
-    ('#' newline_or_space? word* newline_or_space?)*
+    '#' (space? word)* <Comment>
   end
 
   #
@@ -24,27 +28,45 @@ grammar PuppetClass
   #
   rule outer_class_declaration
     space 'class' space class_name space
-    '('? newline_or_space? outer_class_parameters ')'? newline_or_space inherit_declaration? '{' newline_or_space statement newline_or_space '}'
+    '(' outer_class_parameters_block ')' inherit_declaration? '{'
+    newline_or_space
+#       newline_or_space? statement newline_or_space?
+    '}' <OuterClassDeclaration>
   end
 
   rule class_name
     word+ <ClassName>
   end
+  
+  rule outer_class_parameters_block
+    outer_class_parameter_assignation* <OuterClassParametersBlock>
+  end
 
-  rule outer_class_parameters
-    (space outer_class_parameter coma? newline_or_space space)* <OuterClassParameters>
+  rule outer_class_parameter_assignation
+    newline_or_space outer_class_parameter coma? newline_or_space <OuterClassParameterAssignation>
   end
 
   rule outer_class_parameter
     parameter equal value <OuterClassParameter>
   end
 
+  rule parameter
+    '$' word+ <OuterClassParameterName>
+  end
+
+  rule value
+    val+ <OuterClassParameterValue>
+  end
+
+  #
+  # Inherits section
+  #
   rule inherit_declaration
-    newline_or_space? 'inherits' newline_or_space inherit_class newline_or_space
+    newline_or_space? 'inherits' newline_or_space inherit_class newline_or_space <InheritDeclaration>
   end
 
   rule inherit_class
-    word+
+    word+ <InheritClass>
   end
 
 
@@ -54,7 +76,7 @@ grammar PuppetClass
   rule inner_class_declaration
     space 'class' space '{' newline_or_space quote inner_class quote space colon
      newline_or_space inner_class_parameters
-     '}' newline_or_eof <InnerClassDeclaration>
+     '}' newline_or_space <InnerClassDeclaration>
   end
 
   rule inner_class_parameters
@@ -69,7 +91,7 @@ grammar PuppetClass
   # Include
   #
   rule include_declaration
-    space 'include' space include_class newline_or_eof <IncludeDeclaration>
+    space 'include' space include_class newline_or_space <IncludeDeclaration>
   end
 
   rule include_class
@@ -83,25 +105,22 @@ grammar PuppetClass
     word+ <InnerClass>
   end
 
-  rule parameter
-    '$' key
-  end
-
-  rule key
-    word+
-  end
-
-  rule value
-    word+
-  end
-
 
   rule word
     space string <Unknown2>
   end
 
   rule string
-   [a-z:]+ <Unknown1>
+   #[@a-zA-Z0-9'"{}$:_-]+ <Unknown1>
+   [\[\]a-zA-Z0-9@'"$_:-]+ <Unknown1>
+  end
+
+  rule hash
+    '{}'
+  end
+
+  rule val
+   (string / hash)+ <Unknown1>
   end
 
   rule quote
@@ -125,7 +144,7 @@ grammar PuppetClass
   end
 
   rule newline_or_space
-    newline / space
+    space newline space
   end
 
   rule newline_or_eof
@@ -133,7 +152,7 @@ grammar PuppetClass
   end
 
   rule newline
-    space "\n"
+    "\n"*
   end
 
   rule eof
@@ -141,9 +160,8 @@ grammar PuppetClass
   end
 
   rule space
-    " "*
+    ' '*
   end
-
 
 end
 

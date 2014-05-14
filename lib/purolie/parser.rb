@@ -27,7 +27,7 @@ module Purolie
         raise Exception, "Parse error at offset: #{@@parser.index}"
       end
 
-      return tree.to_hash
+      return tree.to_object
     end
 
   end

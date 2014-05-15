@@ -1,0 +1,67 @@
+grammar PuppetClass
+
+  rule statement
+    (include_statement / class_statement / whatever_statement)*
+  end
+
+  rule include_statement
+    space inklude space string newline_eof2
+  end
+
+  rule class_statement
+    space klass space '{' space quote string quote space colon space '}'
+  end
+
+  rule whatever_statement
+    string2 '\n'
+  end
+
+  rule keyword
+    klass / inklude
+  end
+
+  rule klass
+    'class'
+  end
+
+  rule inklude
+    'include'
+  end
+
+  rule string2
+    !newline .+ !newline
+  end
+
+  rule string
+    [a-z]+
+  end
+
+  rule space
+    [\s]*
+  end
+
+  rule quote
+    ['"]
+  end
+
+  rule colon
+    [:]
+  end
+
+  rule newline_eof
+   eof / newline
+  end
+
+  rule newline_eof2
+   newline / eof
+  end
+
+  rule newline
+    [\n]+
+  end
+
+  rule eof
+   !.
+  end
+
+end

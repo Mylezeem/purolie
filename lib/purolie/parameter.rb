@@ -16,5 +16,25 @@
 ## under the License.
 
 module Purolie
-  VERSION = "0.0.1"
+  class Parameter
+
+    attr_reader :key, :value
+
+    def initialize parameter
+      @key = nil
+      @value = nil
+      parse parameter
+    end
+
+    def parse parameter
+      case parameter
+      when Array
+        @key = parameter[1]
+        @value = parameter[2]
+      when String
+        @key = parameter
+      end
+    end
+
+  end
 end

@@ -15,6 +15,27 @@
 ## License for the specific language governing permissions and limitations
 ## under the License.
 
+require 'etc'
+
 module Purolie
-  VERSION = "0.0.1"
+  class Context
+
+    attr_reader :sudo, :path
+
+    def initialize sudo = false, path = '~/.puppet/modules'
+      @sudo = sudo
+      if path.nil? and sudo
+        @path = '/etc/puppet/modules'
+      elsif path.nil? and !sudo
+        @path = "#{Etc.getpwuid.dir}/.puppet/modules"
+      else
+        if path.start_with? '~/'
+          @path = "#{Etc.getpwuid.dir}#{path[1..-1]}"
+        else
+          @path = path
+        end
+      end
+    end
+
+  end
 end

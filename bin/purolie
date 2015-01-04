@@ -1,49 +1,11 @@
 #!/usr/bin/env ruby
 
 require 'purolie'
+require 'purolie/context'
 require 'optparse'
 
-#
-# Argument Handling
-#
-options = {}
-
-opt_parser = OptionParser.new do |opt|
-  opt.banner = "Usage: purolie COMMAND [OPTIONS]"
-  opt.separator ""
-  opt.separator "Commands"
-  opt.separator ""
-  opt.separator "    inspect: list class that will be instantiated"
-  opt.separator "    generate: generate the hiera file for the given profile/role"
-  opt.separator ""
-  opt.separator "Options"
-
-  opt.on("-e", "--environment ENVIRONMENT", "which puppet environment to generate the hiera file for") do |environment|
-    options[:environment] = environment
-  end
-
-  opt.on("-f", "--format FORMAT", "which format to generate the hiera file in") do |format|
-    options[:format] = format
-  end
-
-  opt.on("-h", "--help", "help") do 
-    puts opt_parser
-  end
-
-end
-
-opt_parser.parse!
-
-command = ARGV[0]
-file = ARGV[1] if !ARGV[1].nil?
-puts file
-
-case command
-when "inspect"
-  inspector = Purolie::Inspector.new
-  inspector.inspect file
-when "generate"
-  puts "Generate"
-else
-  puts opt_parser
-end
+file = ARGV[0]
+ctx = Purolie::Context.new true
+obj = Purolie::Purolie.new ctx
+obj.bootstrap file
+obj.display_params

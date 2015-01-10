@@ -26,6 +26,10 @@ module Purolie
       parse parameter
     end
 
+    def is_mandatory?
+      @value.nil?
+    end
+
     def parse_parameter parameter
       case parameter
       when String

@@ -30,6 +30,13 @@ module Purolie
       parse klass_dump
     end
 
+    def contains_mandatory?
+      mandatory = @parameters.collect do |param|
+        param.is_mandatory?
+      end
+      mandatory.include? true
+    end
+
     def is_include? element
       element.size == 3 and
        element[0].eql? 'invoke' and

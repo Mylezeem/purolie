@@ -20,19 +20,21 @@ require 'etc'
 module Purolie
   class Context
 
-    attr_reader :sudo, :path
+    attr_reader :sudo, :path, :environment, :mandatory
 
-    def initialize sudo = false, path = '~/.puppet/modules'
-      @sudo = sudo
-      if path.nil? and sudo
+    def initialize options = {}
+      @sudo = options[:sudo]
+      @mandatory = options[:mandatory]
+      @environment = options[:environment]
+      if options[:path].nil? and options[:sudo]
         @path = '/etc/puppet/modules'
-      elsif path.nil? and !sudo
+      elsif options[:path].nil? and !options[:sudo]
         @path = "#{Etc.getpwuid.dir}/.puppet/modules"
       else
-        if path.start_with? '~/'
-          @path = "#{Etc.getpwuid.dir}#{path[1..-1]}"
+        if options[:path].start_with? '~/'
+          @path = "#{Etc.getpwuid.dir}#{options[path[1..-1]]}"
         else
-          @path = path
+          @path = options[:path]
         end
       end
     end

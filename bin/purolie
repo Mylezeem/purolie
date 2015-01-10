@@ -4,8 +4,59 @@ require 'purolie'
 require 'purolie/context'
 require 'optparse'
 
+#
+# Argument Handling
+#
+options = {
+  :environment => nil,
+  :path        => nil,
+  :mandatory   => false,
+  :sudo        => false,
+}
+
+opt_parser = OptionParser.new do |opt|
+  opt.banner = "Usage: purolie [OPTIONS] PATH"
+  opt.separator ""
+  opt.separator "Options"
+
+  opt.on("-e", "--environment ENVIRONMENT", "Puppet environment") do |environment|
+    options[:environment] = environment
+  end
+
+  opt.on("-p", "--path PATH", "Puppet modules path") do |path|
+    options[:path] = path
+  end
+
+  opt.on("-m", "--mandatory", "Display only mandatory parameter") do |mandatory|
+    options[:mandatory] = true
+  end
+
+  opt.on("-s", "--sudo", "Should look for path as sudo user") do |sudo|
+    options[:sudo] = true
+  end
+
+  opt.on("-h", "--help", "help") do
+    puts opt_parser
+  end
+
+end
+
+opt_parser.parse!
+
+# Validate a file has been passed as argument
+if ARGV.size != 1
+  STDERR.puts opt_parser
+  exit 1
+end
+
 file = ARGV[0]
-ctx = Purolie::Context.new true
+
+# Validate that file exists
+if ! File.exist? file
+  STDERR.puts "Incorrect path: #{file}"
+end
+
+ctx = Purolie::Context.new options
 obj = Purolie::Purolie.new ctx
 obj.bootstrap file
 obj.display_params

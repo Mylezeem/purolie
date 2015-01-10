@@ -31,6 +31,7 @@ module Purolie
     attr_reader :parsed_klasses, :context
 
     def initialize context
+      @original_file = nil
       @parsed_klasses = Array.new
       @to_parse_klasses = Array.new
       @parser = Puppet::Pops::Parser::Parser.new
@@ -39,12 +40,14 @@ module Purolie
     end
 
     def bootstrap file
+      @original_file = file
       first_class = @dumper.dump(@parser.parse_file file)
       @to_parse_klasses.push first_class[1]
       parse_tree @to_parse_klasses
     end
 
     def klass_path klass
+      return @original_file if @parsed_klasses.empty?
       tokens = klass.gsub(/'/, '').split("::")
       if tokens.size > 1
         file_path = "#{@context.path}/#{tokens[0]}/manifests/#{tokens[1..-1].join("/")}.pp"
@@ -55,11 +58,21 @@ module Purolie
 
     def display_params
       @parsed_klasses.each do |klass|
-        puts "#\n# #{klass.name}\n#\n"
-        klass.parameters.each do |parameter|
-          puts "#{klass.name}::#{parameter.key}: #{parameter.value}"
+        if @context.mandatory
+          if klass.contains_mandatory?
+            puts "#\n# #{klass.name}\n#\n"
+            klass.parameters.each do |parameter|
+              puts "#{klass.name}::#{parameter.key}: #{parameter.value}" if parameter.is_mandatory?
+            end
+            puts ""
+          end
+        else
+          puts "#\n# #{klass.name}\n#\n"
+          klass.parameters.each do |parameter|
+            puts "#{klass.name}::#{parameter.key}: #{parameter.value}"
+          end
+          puts ""
         end
-        puts ""
       end
     end
 
@@ -74,12 +87,17 @@ module Purolie
 
     def parse_tree klass_list
       return nil if klass_list.empty?
-      klass_file = klass_path(sanitize_include_klass klass_list.shift)
-      klass_dump = @dumper.dump(@parser.parse_file klass_file)
-      cur_klass = Klass.new klass_dump
-      @parsed_klasses.push cur_klass
-      update_to_parse_klasses cur_klass.include_klasses
-      parse_tree(@to_parse_klasses)
+      begin
+        klass_file = klass_path(sanitize_include_klass klass_list.shift)
+        klass_dump = @dumper.dump(@parser.parse_file klass_file)
+        cur_klass = Klass.new klass_dump
+        @parsed_klasses.push cur_klass
+        update_to_parse_klasses cur_klass.include_klasses
+        parse_tree(@to_parse_klasses)
+      rescue Exception => e
+        STDERR.puts "Could not load puppet class: #{klass_file}"
+        exit 1
+      end
     end
 
     def update_to_parse_klasses klass_list

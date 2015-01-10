@@ -26,11 +26,31 @@ module Purolie
       parse parameter
     end
 
+    def parse_parameter parameter
+      case parameter
+      when String
+        parameter
+      when Array
+        type = parameter.shift
+        if type == '[]'
+          parameter.collect do |elt|
+            elt.tr("'", '')
+          end
+        elsif type == '{}'
+          hash = Hash.new
+          parameter.each do |elt|
+            hash[elt[0].tr("'", '')] = elt[1].tr("'", '')
+          end
+          hash
+        end
+      end
+    end
+
     def parse parameter
       case parameter
       when Array
         @key = parameter[1]
-        @value = parameter[2]
+        @value = parse_parameter(parameter[2])
       when String
         @key = parameter
       end

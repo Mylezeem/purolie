@@ -15,10 +15,13 @@
 ## License for the specific language governing permissions and limitations
 ## under the License.
 
+require 'purolie/util'
 require 'purolie/parameter'
 
 module Purolie
+
   class Klass
+    include Purolie::Util
 
     attr_reader :name, :parameters, :include_klasses, :dump
 
@@ -41,15 +44,6 @@ module Purolie
       element.size == 3 and
        element[0].eql? 'invoke' and
         element[1].eql? 'include'
-    end
-
-    # TODO (spredzy): Put in a Util class
-    def sanitize_include_klass klass
-      if klass.gsub(/'/, '').start_with? "::"
-        klass.gsub(/'/, '')[2..-1]
-      else
-        klass.gsub(/'/, '')
-      end
     end
 
     def parse klass_informations
@@ -90,15 +84,15 @@ module Purolie
       end
     end
 
-    def to_json
+    def to_json mandatory
       final_parameters = @parameters.collect do |parameter|
-        "  \"#{@name}::#{parameter.to_json}"
+        "  \"#{@name}::#{parameter.to_json}" if (mandatory && parameter.is_mandatory?) or !mandatory
       end
     end
 
-    def to_yaml
+    def to_yaml mandatory
       final_parameters = @parameters.collect do |parameter|
-        "#{@name}::#{parameter.to_yaml}"
+        "#{@name}::#{parameter.to_yaml}" if (mandatory && parameter.is_mandatory?) or !mandatory
       end
     end
 

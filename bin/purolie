@@ -4,6 +4,8 @@ require 'purolie'
 require 'purolie/context'
 require 'optparse'
 
+include Purolie
+
 #
 # Argument Handling
 #
@@ -17,6 +19,8 @@ options = {
 
 opt_parser = OptionParser.new do |opt|
   opt.banner = "Usage: purolie [OPTIONS] PATH"
+  opt.separator ""
+  opt.separator "Purolie aims to list, in a recursively way, all the parameter one could potentially define for a given manifest."
   opt.separator ""
   opt.separator "Options"
 
@@ -40,10 +44,6 @@ opt_parser = OptionParser.new do |opt|
     options[:sudo] = true
   end
 
-  opt.on("-h", "--help", "help") do
-    puts opt_parser
-  end
-
 end
 
 opt_parser.parse!
@@ -60,8 +60,8 @@ file = ARGV[0]
 if ! File.exist? file
   STDERR.puts "Incorrect path: #{file}"
 end
+options[:filepath] = file
 
 ctx = Purolie::Context.new options
-obj = Purolie::Purolie.new ctx
-obj.bootstrap file
-obj.display_params
+profile = Purolie.parse ctx
+puts profile

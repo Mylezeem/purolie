@@ -16,6 +16,7 @@
 ## under the License.
 
 module Purolie
+
   class Parameter
 
     attr_reader :key, :value
@@ -90,4 +91,5 @@ module Purolie
     end
 
   end
+
 end

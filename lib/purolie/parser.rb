@@ -15,4 +15,12 @@
 ## License for the specific language governing permissions and limitations
 ## under the License.
 
-require 'purolie/parser'
+require 'purolie/profile'
+
+module Purolie
+
+  def parse ctx
+    Purolie::Profile.new ctx
+  end
+
+end

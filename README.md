@@ -53,7 +53,12 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Purolie CLI offers the following options :
+
+* `--sudo`: Should Purolie look for puppet manifests (ie. `/etc/puppet/modules/`) where user would look for them
+* `--path`: Path where Pruolie should look for puppet manifests
+* `--format`: Should the output be `json` or `yaml`
+* `--mandatory`: Should Purolie only dispay mandatory parameters
 
 ## Contributing
 

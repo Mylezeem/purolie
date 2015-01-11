@@ -20,10 +20,11 @@ require 'etc'
 module Purolie
   class Context
 
-    attr_reader :sudo, :path, :environment, :mandatory
+    attr_reader :sudo, :path, :environment, :mandatory, :format
 
     def initialize options = {}
       @sudo = options[:sudo]
+      @format = options[:format]
       @mandatory = options[:mandatory]
       @environment = options[:environment]
       if options[:path].nil? and options[:sudo]

@@ -60,5 +60,34 @@ module Purolie
       end
     end
 
+    def to_json
+      case @value
+      when Hash
+        "#{@key}\": #{value.to_s.gsub('=>', ':')},\n"
+      when Array
+        "#{@key}\": #{value},\n"
+      else
+        if value.nil?
+          val = ""
+        else
+          val = value.gsub("'", '')
+        end
+        "#{@key}\": \"#{val}\",\n"
+      end
+    end
+
+    def to_yaml
+      case @value
+      when Hash
+        "#{@key}: #{value.to_s.gsub('=>', ': ')}\n"
+      else
+        "#{@key}: #{value}\n"
+      end
+    end
+
+    def to_s
+      to_yaml
+    end
+
   end
 end

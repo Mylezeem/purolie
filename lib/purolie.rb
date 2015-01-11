@@ -57,23 +57,21 @@ module Purolie
     end
 
     def display_params
-      @parsed_klasses.each do |klass|
-        if @context.mandatory
-          if klass.contains_mandatory?
-            puts "#\n# #{klass.name}\n#\n"
-            klass.parameters.each do |parameter|
-              puts "#{klass.name}::#{parameter.key}: #{parameter.value}" if parameter.is_mandatory?
-            end
-            puts ""
-          end
-        else
-          puts "#\n# #{klass.name}\n#\n"
-          klass.parameters.each do |parameter|
-            puts "#{klass.name}::#{parameter.key}: #{parameter.value}"
-          end
-          puts ""
-        end
-      end
+       output = String.new
+       @parsed_klasses.each do |klass|
+         if (@context.mandatory and klass.contains_mandatory?) or !@context.mandatory
+           if @context.format.downcase == 'json'
+             output = output + klass.to_json.join("")
+           else
+             output = output + klass.to_yaml.join("")
+           end
+         end
+       end
+       if @context.format.downcase == 'json'
+         puts "{\n#{output[0..-3]}\n}"
+       else
+         puts "---\n#{output}"
+       end
     end
 
     # TODO (spredzy): Put in a Util class

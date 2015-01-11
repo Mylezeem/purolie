@@ -90,16 +90,20 @@ module Purolie
       end
     end
 
+    def to_json
+      final_parameters = @parameters.collect do |parameter|
+        "  \"#{@name}::#{parameter.to_json}"
+      end
+    end
+
+    def to_yaml
+      final_parameters = @parameters.collect do |parameter|
+        "#{@name}::#{parameter.to_yaml}"
+      end
+    end
+
     def to_s
-#       @name
-#      @include_klasses.each do |inklude|
-#        puts ">> #{inklude}"
-#      end
-#      final_parameters = @parameters.collect do |parameter|
-#        "#{@name}::#{parameter.key}: #{parameter.value}"
-#      end
-#      final_parameters
-       @parameters[0]
+      to_yaml
     end
 
   end

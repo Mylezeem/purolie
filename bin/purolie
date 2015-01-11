@@ -9,6 +9,7 @@ require 'optparse'
 #
 options = {
   :environment => nil,
+  :format      => :yaml,
   :path        => nil,
   :mandatory   => false,
   :sudo        => false,
@@ -21,6 +22,10 @@ opt_parser = OptionParser.new do |opt|
 
   opt.on("-e", "--environment ENVIRONMENT", "Puppet environment") do |environment|
     options[:environment] = environment
+  end
+
+  opt.on("-f", "--format FORMAT", "Format of the output") do |format|
+    options[:format] = format
   end
 
   opt.on("-p", "--path PATH", "Puppet modules path") do |path|

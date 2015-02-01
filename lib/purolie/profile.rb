@@ -20,6 +20,8 @@ require 'purolie/treedumper'
 require 'purolie/klass'
 require 'purolie/util'
 require 'purolie/version'
+require 'yaml'
+require 'json'
 
 module Purolie
   class Profile
@@ -68,23 +70,24 @@ module Purolie
     end
 
     def get_content
-      output = String.new
+      hash = Hash.new
       @parsed_klasses.each do |klass|
-        if @context.format.downcase == 'json'
-          output = output + klass.to_json(@context.mandatory).join("")
-        else
-          output = output + klass.to_yaml(@context.mandatory).join("")
+        klass.parameters.each do |param|
+          hash["#{klass.name}::#{param.key}"] = param.value if (@context.mandatory and param.is_mandatory?) or !@context.mandatory
         end
       end
-      output
+      hash
     end
 
     def to_s
-      output = get_content
-      if @context.format.downcase == 'json'
-        output = "{\n#{output[0..-3]}\n}"
+      content = get_content
+      case @context.format
+      when :json
+        content.to_json
+      when :yaml
+        content.to_yaml
       else
-        output = "---\n#{output}"
+        content.inspect
       end
     end
 

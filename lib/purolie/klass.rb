@@ -84,21 +84,5 @@ module Purolie
       end
     end
 
-    def to_json mandatory
-      final_parameters = @parameters.collect do |parameter|
-        "  \"#{@name}::#{parameter.to_json}" if (mandatory && parameter.is_mandatory?) or !mandatory
-      end
-    end
-
-    def to_yaml mandatory
-      final_parameters = @parameters.collect do |parameter|
-        "#{@name}::#{parameter.to_yaml}" if (mandatory && parameter.is_mandatory?) or !mandatory
-      end
-    end
-
-    def to_s
-      to_yaml
-    end
-
   end
 end

@@ -15,4 +15,29 @@
 ## License for the specific language governing permissions and limitations
 ## under the License.
 
-require 'purolie/parser'
+module Purolie
+
+  module Util
+
+    def sanitize_include_klass klass
+      if klass.gsub(/'/, '').start_with? "::"
+        klass.gsub(/'/, '')[2..-1]
+      else
+        klass.gsub(/'/, '')
+      end
+    end
+
+    def klass_path klass
+      return @original_file if @parsed_klasses.empty?
+      tokens = klass.gsub(/'/, '').split("::")
+      if tokens.size > 1
+        file_path = "#{@context.path}/#{tokens[0]}/manifests/#{tokens[1..-1].join("/")}.pp"
+      else
+        file_path = "#{@context.path}/#{tokens[0]}/manifests/init.pp"
+      end
+    end
+
+
+  end
+
+end

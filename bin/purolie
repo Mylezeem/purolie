@@ -1,49 +1,67 @@
 #!/usr/bin/env ruby
 
 require 'purolie'
+require 'purolie/context'
 require 'optparse'
+
+include Purolie
 
 #
 # Argument Handling
 #
-options = {}
+options = {
+  :environment => nil,
+  :format      => :yaml,
+  :path        => nil,
+  :mandatory   => false,
+  :sudo        => false,
+}
 
 opt_parser = OptionParser.new do |opt|
-  opt.banner = "Usage: purolie COMMAND [OPTIONS]"
+  opt.banner = "Usage: purolie [OPTIONS] PATH"
   opt.separator ""
-  opt.separator "Commands"
-  opt.separator ""
-  opt.separator "    inspect: list class that will be instantiated"
-  opt.separator "    generate: generate the hiera file for the given profile/role"
+  opt.separator "Purolie aims to list, in a recursively way, all the parameter one could potentially define for a given manifest."
   opt.separator ""
   opt.separator "Options"
 
-  opt.on("-e", "--environment ENVIRONMENT", "which puppet environment to generate the hiera file for") do |environment|
+  opt.on("-e", "--environment ENVIRONMENT", "Puppet environment") do |environment|
     options[:environment] = environment
   end
 
-  opt.on("-f", "--format FORMAT", "which format to generate the hiera file in") do |format|
+  opt.on("-f", "--format FORMAT", "Format of the output") do |format|
     options[:format] = format
   end
 
-  opt.on("-h", "--help", "help") do 
-    puts opt_parser
+  opt.on("-p", "--path PATH", "Puppet modules path") do |path|
+    options[:path] = path
+  end
+
+  opt.on("-m", "--mandatory", "Display only mandatory parameter") do |mandatory|
+    options[:mandatory] = true
+  end
+
+  opt.on("-s", "--sudo", "Should look for path as sudo user") do |sudo|
+    options[:sudo] = true
   end
 
 end
 
 opt_parser.parse!
 
-command = ARGV[0]
-file = ARGV[1] if !ARGV[1].nil?
-puts file
-
-case command
-when "inspect"
-  inspector = Purolie::Inspector.new
-  inspector.inspect file
-when "generate"
-  puts "Generate"
-else
-  puts opt_parser
+# Validate a file has been passed as argument
+if ARGV.size != 1
+  STDERR.puts opt_parser
+  exit 1
 end
+
+file = ARGV[0]
+
+# Validate that file exists
+if ! File.exist? file
+  STDERR.puts "Incorrect path: #{file}"
+end
+options[:filepath] = file
+
+ctx = Purolie::Context.new options
+profile = Purolie.parse ctx
+puts profile
